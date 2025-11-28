@@ -3,17 +3,17 @@
   <MainLayout>
     <!-- 顶部统计卡片 -->
     <div class="stats-row">
-      <PageCard title="今日新增房源" :value="stats.today" />
-      <PageCard title="本周新增" :value="stats.week" />
-      <PageCard title="本月新增" :value="stats.month" />
-      <PageCard title="累计房源" :value="stats.total" />
+      <PageCard title="当前均价" :value="formatPrice(stats.avgPrice)" />
+      <PageCard title="房源数量" :value="formatCount(stats.houseCount)" />
+      <PageCard title="最近抓取时间" :value="stats.lastUpdateTime || '--'" />
+      <PageCard title="统计城市" :value="city" />
     </div>
 
     <!-- 图表网格 -->
     <div class="chart-grid">
       <div class="card">
         <div class="section-title">区域房源占比</div>
-        <AreaPieChart :city="city" />
+        <AreaPieChart :city="city" metric="count" />
       </div>
       <div class="card">
         <div class="section-title">户型结构分布</div>
@@ -25,14 +25,14 @@
       </div>
       <div class="card">
         <div class="section-title">热门区域房源数</div>
-        <RegionBarChart :city="city" />
+        <RegionBarChart :city="city" metric="count" />
       </div>
     </div>
   </MainLayout>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import MainLayout from '@/layouts/MainLayout.vue';
 import PageCard from '@/components/PageCard.vue';
 import AreaPieChart from '@/charts/AreaPieChart.vue';
@@ -44,28 +44,41 @@ import RegionBarChart from '@/charts/RegionBarChart.vue';
 import { getOverview } from '@/api/stats';
 
 const stats = ref({
-  today: 0,
-  week: 0,
-  month: 0,
-  total: 0,
+  avgPrice: 0,
+  houseCount: 0,
+  lastUpdateTime: '--',
 });
 
-const city = '成都'; // 你可以后续做成下拉框
+const city = ref('成都'); // 可扩展为动态选择
 
-onMounted(async () => {
+const formatPrice = (value) => {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return '--';
+  return `${num.toLocaleString()} 元/㎡`;
+};
+
+const formatCount = (value) => {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num < 0) return '--';
+  return num.toLocaleString();
+};
+
+const loadOverview = async () => {
   try {
-    const data = await getOverview(city);
-
-    if (data) {
-      stats.value.today = data.today || 0;
-      stats.value.week = data.week || 0;
-      stats.value.month = data.month || 0;
-      stats.value.total = data.total || 0;
+    const res = await getOverview(city.value);
+    if (res && res.code === 200 && res.data) {
+      stats.value.avgPrice = Number(res.data.avgPrice) || 0;
+      stats.value.houseCount = Number(res.data.houseCount) || 0;
+      stats.value.lastUpdateTime = res.data.lastUpdateTime || '--';
     }
   } catch (e) {
     console.error('获取统计数据失败', e);
   }
-});
+};
+
+onMounted(loadOverview);
+
+watch(city, loadOverview);
 </script>
 
 <style scoped>

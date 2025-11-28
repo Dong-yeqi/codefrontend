@@ -29,19 +29,12 @@ let chart;
 const loadData = async () => {
   try {
     const res = await getPriceTrend(props.city, props.region, props.range);
-    const data = res?.data || res || [];
-    
-    // 提取日期和价格数据
-    const dates = [];
-    const prices = [];
-    
-    if (Array.isArray(data)) {
-      data.forEach(item => {
-        dates.push(item.date || item.month || '');
-        prices.push(item.avgPrice || item.price || 0);
-      });
-    }
-    
+    const payload = res && res.code === 200 ? res.data : null;
+
+    const dates = Array.isArray(payload?.dates) ? payload.dates : [];
+    const prices = Array.isArray(payload?.avgPrices) ? payload.avgPrices : [];
+    const normalizedPrices = prices.map((item) => Number(item) || 0);
+
     if (chart) {
       chart.setOption({
         backgroundColor: 'transparent',
@@ -80,7 +73,7 @@ const loadData = async () => {
                 { offset: 1, color: 'rgba(15,23,42,0.1)' },
               ]),
             },
-            data: prices.length > 0 ? prices : [],
+            data: normalizedPrices,
           },
         ],
       });

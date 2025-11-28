@@ -13,6 +13,10 @@ const props = defineProps({
     type: String,
     default: '成都',
   },
+  metric: {
+    type: String,
+    default: 'count',
+  },
 });
 
 const chartRef = ref(null);
@@ -20,18 +24,18 @@ let chart;
 
 const loadData = async () => {
   try {
-    const res = await getRegionCompare(props.city, 'count');
-    const data = res?.data || res || [];
-    
-    // 转换为 ECharts 需要的格式
-    const chartData = Array.isArray(data) 
-      ? data.map(item => ({
-          value: item.count || item.value || 0,
-          name: item.region || item.name || '',
-        }))
-      : [];
-    
-    if (chart && chartData.length > 0) {
+    const res = await getRegionCompare(props.city, props.metric);
+    const payload = res && res.code === 200 ? res.data : null;
+
+    const regions = Array.isArray(payload?.regions) ? payload.regions : [];
+    const values = Array.isArray(payload?.values) ? payload.values : [];
+
+    const chartData = regions.map((name, index) => ({
+      name,
+      value: Number(values[index]) || 0,
+    }));
+
+    if (chart) {
       chart.setOption({
         backgroundColor: 'transparent',
         tooltip: { trigger: 'item' },
@@ -78,9 +82,12 @@ onMounted(() => {
   window.addEventListener('resize', resize);
 });
 
-watch(() => props.city, () => {
-  loadData();
-});
+watch(
+  () => [props.city, props.metric],
+  () => {
+    loadData();
+  }
+);
 
 function resize() {
   chart && chart.resize();

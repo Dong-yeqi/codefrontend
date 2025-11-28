@@ -13,6 +13,10 @@ const props = defineProps({
     type: String,
     default: '成都',
   },
+  metric: {
+    type: String,
+    default: 'count',
+  },
 });
 
 const chartRef = ref(null);
@@ -20,23 +24,24 @@ let chart;
 
 const loadData = async () => {
   try {
-    const res = await getRegionCompare(props.city, 'count');
-    const data = res?.data || res || [];
-    
-    // 转换为 ECharts 需要的格式，按数量排序
-    const chartData = Array.isArray(data)
-      ? data
-          .map(item => ({
-            name: item.region || item.name || '',
-            value: item.count || item.value || 0,
-          }))
-          .sort((a, b) => b.value - a.value)
-          .slice(0, 10) // 只显示前10个
-      : [];
-    
-    const regions = chartData.map(item => item.name);
-    const counts = chartData.map(item => item.value);
-    
+    const res = await getRegionCompare(props.city, props.metric);
+    const payload = res && res.code === 200 ? res.data : null;
+
+    const regions = Array.isArray(payload?.regions) ? payload.regions : [];
+    const values = Array.isArray(payload?.values) ? payload.values : [];
+
+    const chartData = regions.map((name, index) => ({
+      name,
+      value: Number(values[index]) || 0,
+    }));
+
+    const sorted = chartData
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10);
+
+    const axis = sorted.map((item) => item.name);
+    const seriesData = sorted.map((item) => item.value);
+
     if (chart) {
       chart.setOption({
         backgroundColor: 'transparent',
@@ -46,7 +51,7 @@ const loadData = async () => {
           type: 'category',
           axisLine: { lineStyle: { color: '#64748b' } },
           axisLabel: { color: '#cbd5e1', fontSize: 11 },
-          data: regions.length > 0 ? regions : [],
+          data: axis,
         },
         yAxis: {
           type: 'value',
@@ -66,7 +71,7 @@ const loadData = async () => {
                 { offset: 1, color: '#0f172a' },
               ]),
             },
-            data: counts.length > 0 ? counts : [],
+            data: seriesData,
           },
         ],
       });
@@ -89,9 +94,12 @@ onMounted(() => {
   window.addEventListener('resize', resize);
 });
 
-watch(() => props.city, () => {
-  loadData();
-});
+watch(
+  () => [props.city, props.metric],
+  () => {
+    loadData();
+  }
+);
 
 function resize() {
   chart && chart.resize();

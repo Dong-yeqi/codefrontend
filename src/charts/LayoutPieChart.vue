@@ -21,17 +21,17 @@ let chart;
 const loadData = async () => {
   try {
     const res = await getLayoutStructure(props.city);
-    const data = res?.data || res || [];
-    
-    // 转换为 ECharts 需要的格式
-    const chartData = Array.isArray(data)
-      ? data.map(item => ({
-          value: item.count || item.value || 0,
-          name: item.layout || item.name || '',
-        }))
-      : [];
-    
-    if (chart && chartData.length > 0) {
+    const payload = res && res.code === 200 ? res.data : null;
+
+    const labels = Array.isArray(payload?.labels) ? payload.labels : [];
+    const values = Array.isArray(payload?.values) ? payload.values : [];
+
+    const chartData = labels.map((name, index) => ({
+      name,
+      value: Number(values[index]) || 0,
+    }));
+
+    if (chart) {
       chart.setOption({
         backgroundColor: 'transparent',
         tooltip: { trigger: 'item' },
