@@ -2,7 +2,10 @@
   <div class="task-page">
     <PageCard title="爬虫任务管理">
       <template #extra>
-        <button @click="openCreate">新增任务</button>
+        <div class="card-actions">
+          <button @click="openCreate">新增任务</button>
+          <button class="ghost" @click="goDashboard">返回主页</button>
+        </div>
       </template>
 
       <table class="task-table">
@@ -34,6 +37,7 @@
             <td>{{ task.enabled === 1 ? '是' : '否' }}</td>
             <td>{{ task.createTime || '-' }}</td>
             <td>
+              <button class="ghost" @click="onRun(task.id)">运行</button>
               <button @click="openEdit(task)">编辑</button>
               <button class="danger" @click="onDelete(task.id)">删除</button>
             </td>
@@ -102,14 +106,16 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import PageCard from '../../components/PageCard.vue';
 
 // ⭐ 修复：使用实际存在的 API（listTasks），删除 fetchTasks
-import { listTasks, saveTask, deleteTask } from '../../api/task';
+import { listTasks, saveTask, deleteTask, runTask } from '../../api/task';
 
 const tasks = ref([]);
 
 const showDialog = ref(false);
+const router = useRouter();
 
 // 表单字段与后端实体一致
 const form = reactive({
@@ -171,6 +177,10 @@ const openEdit = (task) => {
   showDialog.value = true;
 };
 
+const goDashboard = () => {
+  router.push('/admin/dashboard');
+};
+
 const closeDialog = () => {
   showDialog.value = false;
 };
@@ -202,6 +212,17 @@ const onDelete = async (id) => {
     await loadTasks();
   } catch (error) {
     console.error('删除任务失败:', error);
+  }
+};
+
+// 手动执行任务
+const onRun = async (id) => {
+  if (!id) return;
+  try {
+    await runTask(id);
+    alert('任务已加入执行队列');
+  } catch (error) {
+    console.error('运行任务失败:', error);
   }
 };
 
@@ -292,5 +313,16 @@ button.danger {
 .dialog-actions {
   text-align: right;
   margin-top: 12px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.card-actions .ghost {
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  color: #e5e7eb;
 }
 </style>
