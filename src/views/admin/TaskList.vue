@@ -76,6 +76,14 @@
         </div>
 
         <div class="form-row">
+          <label>Cron 表达式：</label>
+          <input
+            v-model="form.cronExpr"
+            placeholder="如：0 0 2 * * ?（每天凌晨2点）"
+          />
+        </div>
+
+        <div class="form-row">
           <label>是否启用：</label>
           <select v-model.number="form.enabled">
             <option :value="1">启用</option>
@@ -112,6 +120,7 @@ const form = reactive({
   region: '',
   maxPage: 5,
   enabled: 1,
+  cronExpr: '0 0 2 * * ?',
 });
 
 // 重置表单
@@ -123,6 +132,7 @@ const resetForm = () => {
   form.region = '';
   form.maxPage = 5;
   form.enabled = 1;
+  form.cronExpr = '0 0 2 * * ?';
 };
 
 // ⭐ 修复：使用 listTasks() 加载任务
@@ -157,6 +167,7 @@ const openEdit = (task) => {
   form.region = task.region;
   form.maxPage = task.maxPage;
   form.enabled = task.enabled;
+  form.cronExpr = task.cronExpr || '0 0 2 * * ?';
   showDialog.value = true;
 };
 
@@ -168,6 +179,10 @@ const closeDialog = () => {
 const onSave = async () => {
   if (!form.taskName.trim() || !form.city.trim()) {
     alert('任务名称和城市必填');
+    return;
+  }
+  if (!form.cronExpr.trim()) {
+    alert('Cron 表达式必填');
     return;
   }
   try {
