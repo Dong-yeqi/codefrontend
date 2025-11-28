@@ -13,19 +13,19 @@
     <div class="chart-grid">
       <div class="card">
         <div class="section-title">区域房源占比</div>
-        <AreaPieChart />
+        <AreaPieChart :city="city" />
       </div>
       <div class="card">
         <div class="section-title">户型结构分布</div>
-        <LayoutPieChart />
+        <LayoutPieChart :city="city" />
       </div>
       <div class="card">
         <div class="section-title">价格走势</div>
-        <PriceTrendChart />
+        <PriceTrendChart :city="city" />
       </div>
       <div class="card">
         <div class="section-title">热门区域房源数</div>
-        <RegionBarChart />
+        <RegionBarChart :city="city" />
       </div>
     </div>
   </MainLayout>

@@ -127,9 +127,20 @@ const resetForm = () => {
 
 // ⭐ 修复：使用 listTasks() 加载任务
 const loadTasks = async () => {
-  const res = await listTasks();
-  if (res.data && res.data.code === 200) {
-    tasks.value = res.data.data || [];
+  try {
+    const res = await listTasks();
+    // http.js 拦截器已经返回 res.data，所以这里直接处理
+    if (res && res.code === 200) {
+      tasks.value = res.data || [];
+    } else if (Array.isArray(res)) {
+      // 如果直接返回数组
+      tasks.value = res;
+    } else if (res && res.data && Array.isArray(res.data)) {
+      tasks.value = res.data;
+    }
+  } catch (error) {
+    console.error('加载任务列表失败:', error);
+    tasks.value = [];
   }
 };
 
@@ -159,16 +170,24 @@ const onSave = async () => {
     alert('任务名称和城市必填');
     return;
   }
-  await saveTask({ ...form });
-  showDialog.value = false;
-  await loadTasks();
+  try {
+    await saveTask({ ...form });
+    showDialog.value = false;
+    await loadTasks();
+  } catch (error) {
+    console.error('保存任务失败:', error);
+  }
 };
 
 // 删除任务
 const onDelete = async (id) => {
   if (!confirm('确定删除该任务？')) return;
-  await deleteTask(id);
-  await loadTasks();
+  try {
+    await deleteTask(id);
+    await loadTasks();
+  } catch (error) {
+    console.error('删除任务失败:', error);
+  }
 };
 
 onMounted(loadTasks);

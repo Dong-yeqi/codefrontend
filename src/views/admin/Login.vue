@@ -53,7 +53,7 @@ async function onSubmit() {
     }
     localStorage.setItem('token', token);
     localStorage.setItem('username', username.value);
-    router.push('/dashboard');
+    router.push('/admin/dashboard');
   } catch (e) {
     console.error(e);
     alert('登录失败，请检查账号密码');

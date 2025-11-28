@@ -5,52 +5,106 @@
 
 <script setup>
 import * as echarts from 'echarts';
-import { onMounted, onBeforeUnmount, ref } from 'vue';
+import { onMounted, onBeforeUnmount, ref, watch } from 'vue';
+import { getPriceTrend } from '@/api/stats';
+
+const props = defineProps({
+  city: {
+    type: String,
+    default: '成都',
+  },
+  region: {
+    type: String,
+    default: null,
+  },
+  range: {
+    type: String,
+    default: '3m',
+  },
+});
 
 const chartRef = ref(null);
 let chart;
 
+const loadData = async () => {
+  try {
+    const res = await getPriceTrend(props.city, props.region, props.range);
+    const data = res?.data || res || [];
+    
+    // 提取日期和价格数据
+    const dates = [];
+    const prices = [];
+    
+    if (Array.isArray(data)) {
+      data.forEach(item => {
+        dates.push(item.date || item.month || '');
+        prices.push(item.avgPrice || item.price || 0);
+      });
+    }
+    
+    if (chart) {
+      chart.setOption({
+        backgroundColor: 'transparent',
+        tooltip: { trigger: 'axis' },
+        grid: { left: 40, right: 20, top: 24, bottom: 26 },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#64748b' } },
+          axisLabel: { color: '#cbd5e1', fontSize: 11 },
+          data: dates.length > 0 ? dates : [],
+        },
+        yAxis: {
+          type: 'value',
+          axisLine: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(148,163,184,0.25)' } },
+          axisLabel: { 
+            color: '#cbd5e1', 
+            fontSize: 11,
+            formatter: (value) => value >= 10000 ? `${(value / 10000).toFixed(1)}万` : value,
+          },
+        },
+        series: [
+          {
+            name: '均价（元/㎡）',
+            type: 'line',
+            smooth: true,
+            showSymbol: false,
+            lineStyle: {
+              width: 3,
+              color: '#60a5fa',
+            },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(96,165,250,0.6)' },
+                { offset: 1, color: 'rgba(15,23,42,0.1)' },
+              ]),
+            },
+            data: prices.length > 0 ? prices : [],
+          },
+        ],
+      });
+    }
+  } catch (error) {
+    console.error('加载价格趋势数据失败:', error);
+    // 如果 API 失败，显示空数据
+    if (chart) {
+      chart.setOption({
+        xAxis: { data: [] },
+        series: [{ data: [] }],
+      });
+    }
+  }
+};
+
 onMounted(() => {
   chart = echarts.init(chartRef.value);
-  chart.setOption({
-    backgroundColor: 'transparent',
-    tooltip: { trigger: 'axis' },
-    grid: { left: 40, right: 20, top: 24, bottom: 26 },
-    xAxis: {
-      type: 'category',
-      boundaryGap: false,
-      axisLine: { lineStyle: { color: '#64748b' } },
-      axisLabel: { color: '#cbd5e1', fontSize: 11 },
-      data: ['1月','2月','3月','4月','5月','6月'],
-    },
-    yAxis: {
-      type: 'value',
-      axisLine: { show: false },
-      splitLine: { lineStyle: { color: 'rgba(148,163,184,0.25)' } },
-      axisLabel: { color: '#cbd5e1', fontSize: 11 },
-    },
-    series: [
-      {
-        name: '均价（元/㎡）',
-        type: 'line',
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          width: 3,
-          color: '#60a5fa',
-        },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(96,165,250,0.6)' },
-            { offset: 1, color: 'rgba(15,23,42,0.1)' },
-          ]),
-        },
-        data: [15000, 15200, 15450, 15300, 15600, 15800],
-      },
-    ],
-  });
-
+  loadData();
   window.addEventListener('resize', resize);
+});
+
+watch([() => props.city, () => props.region, () => props.range], () => {
+  loadData();
 });
 
 function resize() {
