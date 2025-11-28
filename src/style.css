@@ -1,0 +1,258 @@
+/* ======= 全局基础 ======= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    system-ui, sans-serif;
+  background: radial-gradient(circle at 0% 0%, #0b1120 0%, #020617 55%, #000 100%);
+  color: #e2e8f0;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ======= 顶级布局 ======= */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ======= 侧边栏 ======= */
+.sidebar {
+  width: 230px;
+  background: linear-gradient(180deg, #020617 0%, #020617 40%, #0b1120 100%);
+  border-right: 1px solid rgba(148, 163, 184, 0.25);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-logo {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e5e7eb;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-logo-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: conic-gradient(from 120deg, #38bdf8, #6366f1, #a855f7, #38bdf8);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 9px 11px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #cbd5f5;
+  opacity: 0.85;
+  transition: 0.22s ease;
+}
+
+.sidebar-nav-item-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  border-radius: 6px;
+  background: radial-gradient(circle at 10% 0%, #38bdf8, transparent 55%);
+}
+
+.sidebar-nav-item:hover {
+  background: rgba(148, 163, 184, 0.16);
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+.sidebar-nav-item.active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(129, 140, 248, 0.25));
+  color: #f9fafb;
+  opacity: 1;
+}
+
+/* ======= 主体部分 ======= */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部栏 */
+.topbar {
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
+  backdrop-filter: blur(18px);
+}
+
+.topbar-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 14px;
+  color: #cbd5e1;
+}
+
+/* 内容区域 */
+.main-content {
+  padding: 20px 22px 26px;
+}
+
+/* ======= 卡片（玻璃拟态） ======= */
+.card {
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  transition: 0.24s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 55px rgba(15, 23, 42, 0.95);
+}
+
+/* 标题 */
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #e5e7eb;
+}
+
+/* ======= 通用按钮 ======= */
+.btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  color: white;
+  transition: 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.5);
+}
+
+/* 轻量按钮 */
+.btn-ghost {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: transparent;
+  color: #e5e7eb;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s ease;
+}
+
+.btn-ghost:hover {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+/* ======= 输入框 ======= */
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+  outline: none;
+  font-size: 14px;
+}
+
+.input:focus {
+  border-color: #3b82f6;
+}
+
+/* ======= 高级表格 ======= */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead tr {
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.table th,
+.table td {
+  padding: 9px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.9);
+}
+
+.table th {
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+.table tbody tr:hover {
+  background: rgba(30, 64, 175, 0.35);
+}
+
+/* 状态标签 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.tag-success {
+  background: rgba(22, 163, 74, 0.15);
+  color: #22c55e;
+}
+
+.tag-running {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+}
+
+.tag-failed {
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+}
